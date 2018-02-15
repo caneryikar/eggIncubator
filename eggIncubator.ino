@@ -36,6 +36,8 @@ Servo servo;
 int servoAngle = 0;   // servo position in degrees
 
 int direction = 1;
+
+//60 equals to 1min
 int servoRotationSecond = 60;
 float celciusLimit = 36.5;
 int wifiCounter = 0;
@@ -139,7 +141,7 @@ void runServo(int dir){
 Serial.println("servo rotated to left");
  //servo.write(0);      
 
- for(servoAngle = 90; servoAngle > 0; servoAngle--)  
+ for(servoAngle = 0; servoAngle < 90; servoAngle++)  
   {                                  
     servo.write(servoAngle);              
     delay(50);                  
@@ -151,7 +153,7 @@ Serial.println("servo rotated to left");
  Serial.println("servo rotated to right");
    //servo.write(90);     
 
-   for(servoAngle = 0; servoAngle < 90; servoAngle++)  
+   for(servoAngle = 90; servoAngle > 0; servoAngle--)  
   {                                  
     servo.write(servoAngle);              
     delay(50);                  
