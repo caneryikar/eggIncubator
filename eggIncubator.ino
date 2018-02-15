@@ -66,6 +66,7 @@ void setup() {
 
 for(servoAngle = servoPosition; servoAngle > 0; servoAngle--)  
   {                                  
+    //servo initial positioning
     servo.write(servoAngle);              
     delay(50);                  
   }
