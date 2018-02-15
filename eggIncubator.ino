@@ -1,36 +1,42 @@
-
 // include the library code:
 #include <LiquidCrystal.h>
-#include "DHT.h"
+#include <dht.h>
 #include <Servo.h>
+#include "WiFiEsp.h"
 
 // set the DHT Pin
-#define DHTPIN 8
+#define DHT11_PIN 8
+dht DHT;
+
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
-#define DHTTYPE DHT11
-DHT dht(DHTPIN, DHTTYPE);
 
-double counter = 0;f
+// Emulate Serial1 on pins 7/6 if not present
+#ifndef HAVE_HWSERIAL1
+#include "SoftwareSerial.h"
+SoftwareSerial Serial1(6, 7); // RX, TX
+#endif
+
+char ssid[] = "TivibuIPTV";     // your network SSID (name)
+char pwd[] = "iptv35izmir";  // your network password
+
+// Initialize the Wifi client library
+WiFiEspClient client;
+
+double counter = 0;
 int heaterBulbPin = 13;
 int servoPin = 9;
 Servo servo;  
 int servoAngle = 0;
 int direction = 1;
-
-
-//Variables
-int servoRotationSecond = 10;
+int servoRotationSecond = 300;
 float celciusLimit = 38.5;
+int wifiCounter = 0;
 
 
 void setup() {
-
-  Serial.println("setup started");
-
   // set up the LCD's number of columns and rows: 
   lcd.begin(16, 2);
-  dht.begin();
   
   // Print a message to the LCD.
   lcd.print("Temp:  Humidity:");
@@ -39,8 +45,8 @@ void setup() {
   Serial.begin(19200);
   servo.attach(servoPin);
 
-  Serial.println("setup completed");
-
+  Serial1.begin(9600);
+  WiFi.init(&Serial1);
 }
 
 
@@ -51,19 +57,30 @@ void loop() {
 
 
   if(counter==servoRotationSecond){
-      runServo(direction); 
+   runServo(direction); 
    }
    
     
   // set the cursor to column 0, line 1
   // (note: line 1 is the second row, since counting begins with 0):
   lcd.setCursor(0, 1);
+
+  int chk = DHT.read11(DHT11_PIN);
+  if (chk == -2) {
+    //TODO:
+  }
+  
   // read humidity
-  float h = dht.readHumidity();
+  float h = DHT.humidity;
   //read temperature in Fahrenheit
-  float c = dht.readTemperature(false);
+  float c = DHT.temperature;
 //  float c = (f-32.00)/1.8;
 Serial.println(c);
+
+  if (++wifiCounter == 5) {
+     sendData(c);
+     wifiCounter = 0;
+  }
 
   if (isnan(h) || isnan(c)) {
     lcd.print("ERROR");
@@ -112,5 +129,95 @@ Serial.println("servo rotated to left");
    direction = 1;
     }
     counter = 0;
+}
+
+// TODO: refactor me
+void sendData(int celcius) {
+
+  bool f;
+  int c;
+
+  assertEquals("Check status WL_DISCONNECTED", WiFi.status(), WL_DISCONNECTED);
+  
+  assertEquals("Connect", WiFi.begin(ssid, pwd), WL_CONNECTED);
+  
+  assertEquals("Check status WL_CONNECTED", WiFi.status(), WL_CONNECTED);
+  
+  IPAddress ip = WiFi.localIP();
+  Serial.print("IP Address: ");
+  Serial.println(ip);
+
+  assertEquals("Ping", WiFi.ping("95.6.100.21"), true);
+  
+  assertEquals("Not connected", client.connected(), false);
+  assertEquals("Connect to server", client.connect("95.6.100.21", 8090), 1);
+  assertEquals("Connected", client.connected(), true);
+
+
+  //--------------------------------------------------------------
+  // HTTP request without 'Connection: close' command
+
+  char buf[50];
+  sprintf(buf, "GET /sensors/temperature/%d HTTP/1.1", celcius); // puts string into buffer
+  Serial.print("Command:");
+  Serial.println(buf);
+  
+  client.println(buf);
+  client.println("Host: 95.6.100.21");
+  client.println("Connection: close");
+  client.println();
+}
+
+void assertEquals(const char* test, int actual, int expected)
+{
+  if(actual==expected)
+    pass(test);
+  else
+    fail(test, actual, expected);
+}
+
+void assertEquals(const char* test, char* actual, char* expected)
+{
+  if(strcmp(actual, expected) == 0)
+    pass(test);
+  else
+    fail(test, actual, expected);
+}
+
+
+void pass(const char* test)
+{
+  Serial.print(F("********************************************** "));
+  Serial.print(test);
+  Serial.println(" > PASSED");
+  Serial.println();
+}
+
+void fail(const char* test, char* actual, char* expected)
+{
+  Serial.print(F("********************************************** "));
+  Serial.print(test);
+  Serial.print(" > FAILED");
+  Serial.print(" (actual=\"");
+  Serial.print(actual);
+  Serial.print("\", expected=\"");
+  Serial.print(expected);
+  Serial.println("\")");
+  Serial.println();
+  delay(10000);
+}
+
+void fail(const char* test, int actual, int expected)
+{
+  Serial.print(F("********************************************** "));
+  Serial.print(test);
+  Serial.print(" > FAILED");
+  Serial.print(" (actual=");
+  Serial.print(actual);
+  Serial.print(", expected=");
+  Serial.print(expected);
+  Serial.println(")");
+  Serial.println();
+  delay(10000);
 }
 
