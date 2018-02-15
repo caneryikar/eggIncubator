@@ -17,8 +17,13 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 SoftwareSerial Serial1(6, 7); // RX, TX
 #endif
 
-char ssid[] = "TivibuIPTV";     // your network SSID (name)
-char pwd[] = "iptv35izmir";  // your network password
+//char ssid[] = "TivibuIPTV";     // your network SSID (name)
+//char pwd[] = "iptv35izmir";  // your network password
+
+
+char ssid[] = "ouysal";     // your network SSID (name)
+char pwd[] = "fdu0rr35";  // your network password
+
 
 // Initialize the Wifi client library
 WiFiEspClient client;
@@ -27,11 +32,16 @@ double counter = 0;
 int heaterBulbPin = 13;
 int servoPin = 9;
 Servo servo;  
-int servoAngle = 0;
+
+int servoAngle = 0;   // servo position in degrees
+
 int direction = 1;
-int servoRotationSecond = 15;
+int servoRotationSecond = 60;
 float celciusLimit = 36.5;
 int wifiCounter = 0;
+
+
+int port = 8081;
 
 boolean wifiStatus = false;
 
@@ -46,7 +56,7 @@ void setup() {
   pinMode(heaterBulbPin, OUTPUT);
   Serial.begin(19200);
   servo.attach(servoPin);
-
+  servo.write(0);
 
     if(wifiStatus){
       Serial1.begin(9600);  
@@ -127,15 +137,30 @@ void runServo(int dir){
   if (dir==1)
   {// turn right
 Serial.println("servo rotated to left");
- servo.write(0);      // Turn SG90 servo Left to 45 degrees
+ //servo.write(0);      
+
+ for(servoAngle = 90; servoAngle > 0; servoAngle--)  
+  {                                  
+    servo.write(servoAngle);              
+    delay(50);                  
+  }
   direction = -1;
     }
    else{
   //turn left
  Serial.println("servo rotated to right");
-   servo.write(90);     // Turn SG90 servo Right to 135 degrees
+   //servo.write(90);     
+
+   for(servoAngle = 0; servoAngle < 90; servoAngle++)  
+  {                                  
+    servo.write(servoAngle);              
+    delay(50);                  
+  }
+  
    direction = 1;
     }
+
+    
     counter = 0;
 }
 
@@ -158,7 +183,7 @@ void sendData(int celcius) {
   assertEquals("Ping", WiFi.ping("95.6.100.21"), true);
   
   assertEquals("Not connected", client.connected(), false);
-  assertEquals("Connect to server", client.connect("95.6.100.21", 8090), 1);
+  assertEquals("Connect to server", client.connect("95.6.100.21", port), 1);
   assertEquals("Connected", client.connected(), true);
 
 
