@@ -29,8 +29,8 @@ int servoPin = 9;
 Servo servo;  
 int servoAngle = 0;
 int direction = 1;
-int servoRotationSecond = 300;
-float celciusLimit = 38.5;
+int servoRotationSecond = 15;
+float celciusLimit = 36.5;
 int wifiCounter = 0;
 
 boolean wifiStatus = false;
