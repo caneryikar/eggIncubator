@@ -11,17 +11,23 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 #define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE);
 
-double counter = 0;
+double counter = 0;f
 int heaterBulbPin = 13;
 int servoPin = 9;
 Servo servo;  
 int servoAngle = 0;
 int direction = 1;
-int servoRotationSecond = 300;
+
+
+//Variables
+int servoRotationSecond = 10;
 float celciusLimit = 38.5;
 
 
 void setup() {
+
+  Serial.println("setup started");
+
   // set up the LCD's number of columns and rows: 
   lcd.begin(16, 2);
   dht.begin();
@@ -33,6 +39,7 @@ void setup() {
   Serial.begin(19200);
   servo.attach(servoPin);
 
+  Serial.println("setup completed");
 
 }
 
@@ -44,7 +51,7 @@ void loop() {
 
 
   if(counter==servoRotationSecond){
-   runServo(direction); 
+      runServo(direction); 
    }
    
     
