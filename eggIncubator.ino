@@ -58,7 +58,19 @@ void setup() {
   pinMode(heaterBulbPin, OUTPUT);
   Serial.begin(19200);
   servo.attach(servoPin);
-  servo.write(0);
+
+  int servoPosition=servo.read();
+
+      Serial.println("servoPosition ");
+            Serial.println(servoPosition);
+
+for(servoAngle = servoPosition; servoAngle > 0; servoAngle--)  
+  {                                  
+    servo.write(servoAngle);              
+    delay(50);                  
+  }
+
+  //servo.write(0);
 
     if(wifiStatus){
       Serial1.begin(9600);  
@@ -137,8 +149,8 @@ if (c>celciusLimit)
 
 void runServo(int dir){
   if (dir==1)
-  {// turn right
-Serial.println("servo rotated to left");
+  {
+Serial.println("servo rotated to right");
  //servo.write(0);      
 
  for(servoAngle = 0; servoAngle < 90; servoAngle++)  
@@ -149,8 +161,8 @@ Serial.println("servo rotated to left");
   direction = -1;
     }
    else{
-  //turn left
- Serial.println("servo rotated to right");
+  //
+ Serial.println("servo rotated to left");
    //servo.write(90);     
 
    for(servoAngle = 90; servoAngle > 0; servoAngle--)  
