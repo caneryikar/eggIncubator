@@ -33,6 +33,8 @@ int servoRotationSecond = 300;
 float celciusLimit = 38.5;
 int wifiCounter = 0;
 
+boolean wifiStatus = false;
+
 
 void setup() {
   // set up the LCD's number of columns and rows: 
@@ -45,8 +47,11 @@ void setup() {
   Serial.begin(19200);
   servo.attach(servoPin);
 
-  Serial1.begin(9600);
-  WiFi.init(&Serial1);
+
+    if(wifiStatus){
+      Serial1.begin(9600);  
+      WiFi.init(&Serial1);
+    }
 }
 
 
@@ -67,7 +72,7 @@ void loop() {
 
   int chk = DHT.read11(DHT11_PIN);
   if (chk == -2) {
-    //TODO:
+    return;
   }
   
   // read humidity
@@ -77,10 +82,13 @@ void loop() {
 //  float c = (f-32.00)/1.8;
 Serial.println(c);
 
+if(wifiStatus){
   if (++wifiCounter == 5) {
      sendData(c);
      wifiCounter = 0;
   }
+  }
+  
 
   if (isnan(h) || isnan(c)) {
     lcd.print("ERROR");
