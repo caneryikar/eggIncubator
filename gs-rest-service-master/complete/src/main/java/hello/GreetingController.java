@@ -30,6 +30,22 @@ public class GreetingController {
 	public void setTemperature(@PathVariable int temperature) {
     	sensors.setTemperature(temperature);    	
     }
+	
+	@RequestMapping("/sensors/humidity")
+    public int getHumidity(@RequestParam(value="name", defaultValue="temperature") String name) {
+    	return sensors.getHumidity();
+    }
+
+    @RequestMapping("/sensors/humidity/{humidity}")
+	public void setHumidity(@PathVariable int humidity) {
+    	sensors.setHumidity(humidity);    	
+    }
+	
+	
+	@RequestMapping("/sensors")
+    public int getSensors(@RequestParam(value="name", defaultValue="temp") String name) {
+    	return sensors.getSensors();
+    }
 
 
 }
